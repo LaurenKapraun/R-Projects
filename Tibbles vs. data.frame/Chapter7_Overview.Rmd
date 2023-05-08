@@ -1,0 +1,103 @@
+---
+title: "Tibbles vs. data.frame"
+author: "Lauren Kapraun"
+date: "09/17/18"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+install.packages("tibble")
+library(tibble)
+library(tidyverse)
+library(tidyr)
+library(magrittr)
+```
+
+Before starting, I installed the following: **tibble** packages and the **tibble, tidyverse, tidyr, magrittr** libraries. 
+
+The two main fifferences in using a tibble versus the `data.frame` is printing and subsetting.
+
+## Printing
+When using tibbles, the refined print method only displays the first 10 rows by default.
+
+```{r defaultPrint, message=FALSE, warning=FALSE}
+tb = tibble(
+  a = lubridate::now() + runif(1e3) * 86400,
+  b = lubridate::today() + runif(1e3) * 30,
+  c = 1:1e3,
+  d = runif(1e3),
+  e = sample(letters, 1e3, replace = TRUE)
+)
+```
+
+### Display Options
+One option you can use to display more than the first 10 rows is to use the `print(n)` function, where "n" is the number of rows you want to display. If some of the columns are hidden due to to size, you can also use `width=Inf` to show all of the columns in the table. 
+
+```{r printFifteenRows}
+tb %>%
+  print(n = 15, width = Inf)
+```
+
+#### Display Min & Max
+To show a minimum or a maximum number of rows use: `options(tibble.print_max = n, tribble.print_min = m)`. In this instance, if there are more than "m" rows, it will display all the rows up to "n" rows. 
+
+```{r printMinMax, results='hide'}
+options(tibble.print_max = 30, tibble.print_min = 20)
+  tb
+```
+
+#### Disply All Rows
+To always display all rows, use: `options(dplyr.print_min = Inf)`.
+
+```{r printAllRows, results='hide'}
+options(dplyr.print_min = Inf)
+  tb
+```
+
+#### Disply All Columns
+To show all columns by default, use: `options(tribble.width = Inf)`
+
+```{r printAllColumns, results='hide'}
+options(n = 15, tribble.width = Inf)
+  tb
+```
+
+#### Disply All in New Tab
+You can also use RStudio's built-in data viewer to display a scrollable view of the dataset using `View()`. 
+
+### Final Print Options
+To view all of the package options, run `package?tibble`
+
+## Subsetting
+To pull from a single vairable, you can use `[[` to extract by name or position, or you can use `$` to extract only by name.
+
+Tibbles are more strict than data.frames, as they do not allow for partial matching.
+
+```{r setupSubset}
+df = tibble(
+  x = runif(5),
+  y = runif(5)
+)
+
+# Extract by Name
+df$x
+df[["x"]]
+
+# Extract by Position
+df[[1]]
+
+# To Use in a Pipe, Use a Special Placeholder
+df %>% .$x
+df %>% .[["x"]]
+```
+
+## Interacting with Older Code
+If you are trying to use an older function that doesn't seem to be working, use `as.data.frame()` to convert the tibble to a data.frame.
+
+```{r switchToDataFrame, results='hide'}
+class(as.data.frame(tb))
+```
